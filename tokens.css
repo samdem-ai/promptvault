@@ -1,0 +1,105 @@
+/* Design tokens for Inject — prompt injection research organizer */
+:root {
+  /* Surface */
+  --bg-0: oklch(0.155 0.004 270);   /* deepest */
+  --bg-1: oklch(0.185 0.004 270);   /* panel */
+  --bg-2: oklch(0.215 0.004 270);   /* elevated row hover */
+  --bg-3: oklch(0.255 0.004 270);   /* selected */
+
+  /* Lines */
+  --line-1: oklch(0.255 0.004 270);
+  --line-2: oklch(0.305 0.004 270);
+
+  /* Text */
+  --fg-0: oklch(0.945 0.003 270);
+  --fg-1: oklch(0.78 0.005 270);
+  --fg-2: oklch(0.58 0.005 270);
+  --fg-3: oklch(0.43 0.005 270);
+
+  /* Accent — single, used sparingly */
+  --accent: oklch(0.79 0.14 65);
+  --accent-dim: oklch(0.79 0.14 65 / 0.16);
+  --accent-line: oklch(0.79 0.14 65 / 0.35);
+
+  /* Status — reserved exclusively for prompt outcomes */
+  --st-blocked: oklch(0.66 0.18 25);     /* red */
+  --st-partial: oklch(0.82 0.14 88);     /* yellow */
+  --st-bypassed: oklch(0.74 0.14 150);   /* green */
+  --st-untested: oklch(0.55 0.005 270);  /* gray */
+
+  /* Type */
+  --font-ui: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, Menlo, monospace;
+
+  --r-1: 3px;
+  --r-2: 5px;
+  --r-3: 7px;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--font-ui); color: var(--fg-0); -webkit-font-smoothing: antialiased; }
+
+/* Reusable atoms used across screens */
+.kbd {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  padding: 2px 5px;
+  border: 1px solid var(--line-1);
+  border-bottom-width: 2px;
+  border-radius: var(--r-1);
+  color: var(--fg-1);
+  background: var(--bg-1);
+  line-height: 1;
+}
+
+.dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  display: inline-block; flex-shrink: 0;
+}
+
+.tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  padding: 2px 6px 2px 5px;
+  border-radius: var(--r-1);
+  border: 1px solid var(--line-1);
+  background: var(--bg-1);
+  color: var(--fg-1);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+.tag .dot { width: 5px; height: 5px; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-ui); font-size: 12px; font-weight: 500;
+  padding: 5px 10px;
+  border-radius: var(--r-2);
+  border: 1px solid var(--line-1);
+  background: var(--bg-1);
+  color: var(--fg-0);
+  cursor: pointer;
+  letter-spacing: -0.005em;
+}
+.btn:hover { background: var(--bg-2); border-color: var(--line-2); }
+.btn-primary { background: var(--fg-0); color: var(--bg-0); border-color: var(--fg-0); }
+.btn-primary:hover { background: var(--fg-1); border-color: var(--fg-1); }
+.btn-ghost { background: transparent; border-color: transparent; color: var(--fg-1); }
+.btn-ghost:hover { background: var(--bg-2); color: var(--fg-0); border-color: transparent; }
+
+/* All screens are 1440x900 frames inside the canvas */
+.screen {
+  width: 1440px; height: 900px;
+  background: var(--bg-0);
+  color: var(--fg-0);
+  font-size: 13px;
+  line-height: 1.45;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  letter-spacing: -0.005em;
+}
+
+/* Tabular numerals for counts and timestamps */
+.tnum { font-variant-numeric: tabular-nums; }
