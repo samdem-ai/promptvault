@@ -23,10 +23,16 @@ export function usePrompts(workspaceId: number | null, filters: PromptFilters = 
     if (statuses?.length) results = results.filter(p => statuses.includes(p.status));
     if (search) {
       const s = search.toLowerCase();
+      const versionIds = results.map(p => p.currentVersionId).filter(Boolean) as number[];
+      const versions = versionIds.length
+        ? await db.promptVersions.where('id').anyOf(versionIds).toArray()
+        : [];
+      const bodyMap = new Map(versions.map(v => [v.id!, v.body]));
       results = results.filter(p =>
         p.title.toLowerCase().includes(s) ||
         p.promptId.toLowerCase().includes(s) ||
-        p.tags.some(t => t.toLowerCase().includes(s))
+        p.tags.some(t => t.toLowerCase().includes(s)) ||
+        (p.currentVersionId != null && (bodyMap.get(p.currentVersionId) ?? '').toLowerCase().includes(s))
       );
     }
     return results.sort((a, b) => b.updatedAt - a.updatedAt);

@@ -1,3 +1,4 @@
+import { useRef, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useWorkspaces } from '../../db/hooks/useWorkspaces';
 import { useUIStore } from '../../store/ui';
@@ -25,6 +26,17 @@ export function Sidebar() {
   const workspaces = useWorkspaces();
   const { activeWorkspaceId, setActiveWorkspace, openPalette } = useUIStore();
   const activeWs = workspaces.find(w => w.id === activeWorkspaceId);
+  const [wsOpen, setWsOpen] = useState(false);
+  const wsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!wsOpen) return;
+    const handle = (e: MouseEvent) => {
+      if (!wsRef.current?.contains(e.target as Node)) setWsOpen(false);
+    };
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, [wsOpen]);
 
   return (
     <aside style={{
@@ -49,19 +61,46 @@ export function Sidebar() {
       </div>
 
       {/* Workspace switcher */}
-      <div style={{ padding: '0 10px' }}>
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 8,
+      <div ref={wsRef} style={{ padding: '0 10px', position: 'relative' }}>
+        <button onClick={() => setWsOpen(v => !v)} style={{
+          display: 'flex', alignItems: 'center', gap: 8, width: '100%',
           padding: '7px 8px',
-          background: 'var(--bg-1)', border: '1px solid var(--line-1)',
-          borderRadius: 'var(--r-2)', fontSize: 12, fontWeight: 500, cursor: 'pointer',
+          background: wsOpen ? 'var(--bg-2)' : 'var(--bg-1)', border: '1px solid var(--line-1)',
+          borderRadius: 'var(--r-2)', fontSize: 12, fontWeight: 500, cursor: 'pointer', color: 'var(--fg-0)',
         }}>
           <div style={{ width: 14, height: 14, borderRadius: 3, background: activeWs?.color ?? 'var(--bg-3)', flexShrink: 0 }} />
-          <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'left' }}>
             {activeWs?.name ?? 'No workspace'}
           </span>
-          <span style={{ color: 'var(--fg-3)' }}>{I.chevD}</span>
-        </div>
+          <span style={{ color: 'var(--fg-3)', transform: wsOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>{I.chevD}</span>
+        </button>
+
+        {wsOpen && (
+          <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 10, right: 10, zIndex: 200, background: 'var(--bg-1)', border: '1px solid var(--line-1)', borderRadius: 'var(--r-2)', boxShadow: '0 8px 24px rgba(0,0,0,0.35)', overflow: 'hidden' }}>
+            {workspaces.map((w, i) => (
+              <button key={w.id} onClick={() => { setActiveWorkspace(w.id!); setWsOpen(false); }} style={{
+                display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+                padding: '8px 10px', background: 'transparent', border: 'none', cursor: 'pointer',
+                fontSize: 12, color: 'var(--fg-0)', fontFamily: 'var(--font-mono)', letterSpacing: '-0.01em',
+                borderBottom: i < workspaces.length - 1 ? '1px solid var(--line-1)' : 'none',
+              }}>
+                <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: w.color || COLORS[i % COLORS.length], flexShrink: 0 }} />
+                <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'left' }}>{w.name}</span>
+                {w.id === activeWorkspaceId && <span style={{ color: 'var(--accent)', display: 'flex' }}>{I.check}</span>}
+              </button>
+            ))}
+            <div style={{ borderTop: '1px solid var(--line-1)' }}>
+              <button onClick={() => { navigate('/onboarding'); setWsOpen(false); }} style={{
+                display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+                padding: '8px 10px', background: 'transparent', border: 'none', cursor: 'pointer',
+                fontSize: 12, color: 'var(--fg-2)',
+              }}>
+                <span style={{ display: 'flex', color: 'var(--fg-3)' }}>{I.plus}</span>
+                New workspace
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Search */}
@@ -102,46 +141,6 @@ export function Sidebar() {
             </button>
           );
         })}
-      </div>
-
-      {/* Workspaces list */}
-      <div style={{ marginTop: 18, padding: '0 10px' }}>
-        <div style={{
-          padding: '0 8px 6px',
-          fontSize: 10.5, fontWeight: 600,
-          textTransform: 'uppercase', letterSpacing: '0.08em',
-          color: 'var(--fg-3)',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        }}>
-          <span>Workspaces</span>
-          <button onClick={() => navigate('/onboarding')} style={{
-            background: 'none', border: 'none', cursor: 'pointer', color: 'var(--fg-2)',
-            display: 'flex', alignItems: 'center',
-          }}>{I.plus}</button>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          {workspaces.map((w, i) => {
-            const isActive = w.id === activeWorkspaceId;
-            return (
-              <button key={w.id} onClick={() => setActiveWorkspace(w.id!)} style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                padding: '5px 8px', borderRadius: 'var(--r-2)', fontSize: 12,
-                color: isActive ? 'var(--fg-0)' : 'var(--fg-1)',
-                background: isActive ? 'var(--bg-2)' : 'transparent',
-                border: 'none', cursor: 'pointer', width: '100%',
-                fontFamily: 'var(--font-mono)', letterSpacing: '-0.01em',
-              }}>
-                <span style={{
-                  display: 'inline-block', width: 7, height: 7, borderRadius: '50%',
-                  background: isActive ? 'var(--accent)' : (w.color || COLORS[i % COLORS.length]),
-                }} />
-                <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'left' }}>
-                  {w.name}
-                </span>
-              </button>
-            );
-          })}
-        </div>
       </div>
 
       {/* Footer */}

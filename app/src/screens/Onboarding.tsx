@@ -67,7 +67,7 @@ export function Onboarding({ onComplete }: { onComplete?: () => void }) {
               <input type="checkbox" checked={useSeed} onChange={e => setUseSeed(e.target.checked)} style={{ marginTop: 2, accentColor: 'var(--accent)' }} />
               <div>
                 <div style={{ fontSize: 13, fontWeight: 500 }}>Load sample data</div>
-                <div style={{ fontSize: 11.5, color: 'var(--fg-3)', marginTop: 2, lineHeight: 1.4 }}>Creates a demo workspace with example prompts, challenges, tags, and runs so you can explore the UI immediately.</div>
+                <div style={{ fontSize: 11.5, color: 'var(--fg-3)', marginTop: 2, lineHeight: 1.4 }}>Loads 2 Gray Swan workspaces: <b style={{color:'var(--fg-2)'}}>Safeguards</b> (365 prompts, 32 challenges) and <b style={{color:'var(--fg-2)'}}>Staged Attacks</b> (325 prompts, 12 challenges) — all successful submissions.</div>
               </div>
             </label>
           </div>
@@ -87,7 +87,7 @@ export function Onboarding({ onComplete }: { onComplete?: () => void }) {
         </div>
 
         <button onClick={handleStart} disabled={loading || (!useSeed && !name.trim())} style={{ padding: '10px 0', background: 'var(--fg-0)', border: 'none', borderRadius: 'var(--r-2)', cursor: 'pointer', fontSize: 13, color: 'var(--bg-0)', fontWeight: 600, letterSpacing: '-0.005em' }}>
-          {loading ? (useSeed ? 'Importing 365 prompts… (~10s)' : 'Setting up…') : 'Open inject.dev →'}
+          {loading ? (useSeed ? 'Importing 690 prompts across 2 workspaces… (~20s)' : 'Setting up…') : 'Open inject.dev →'}
         </button>
       </div>
     </div>
