@@ -83,20 +83,35 @@ export function CommandPalette() {
         section: 'Challenges',
         items: challenges.map(c => ({
           id: `c-${c.id}`, label: c.title, hint: c.challengeId, icon: I.layers,
-          action: () => { navigate('/overview'); closePalette(); },
+          action: () => { navigate(`/challenges/${c.id}`); closePalette(); },
         })),
       }];
     }
 
-    // free text: prompts + tags
-    const [prompts, tags] = await Promise.all([
+    // free text: prompts (title + body) + tags
+    const [allPrompts, tags] = await Promise.all([
       activeWorkspaceId != null
-        ? db.prompts.where('workspaceId').equals(activeWorkspaceId)
-            .filter(p => !p.archived && (p.title.toLowerCase().includes(term) || p.promptId.toLowerCase().includes(term)))
-            .limit(6).toArray()
+        ? db.prompts.where('workspaceId').equals(activeWorkspaceId).filter(p => !p.archived).toArray()
         : [],
       db.tags.filter(t => t.name.includes(term)).limit(4).toArray(),
     ]);
+
+    let prompts = allPrompts;
+    if (allPrompts.length > 0) {
+      const versionIds = allPrompts.map(p => p.currentVersionId).filter(Boolean) as number[];
+      const versions = versionIds.length > 0
+        ? await db.promptVersions.where('id').anyOf(versionIds).toArray()
+        : [];
+      const bodyMap = new Map(versions.map(v => [v.id!, v.body.toLowerCase()]));
+      prompts = allPrompts
+        .filter(p =>
+          p.title.toLowerCase().includes(term) ||
+          p.promptId.toLowerCase().includes(term) ||
+          p.tags.some(t => t.toLowerCase().includes(term)) ||
+          (p.currentVersionId != null && (bodyMap.get(p.currentVersionId) ?? '').includes(term))
+        )
+        .slice(0, 8);
+    }
 
     const result: PaletteGroup[] = [];
     if (prompts.length) result.push({
